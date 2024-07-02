@@ -1,0 +1,7 @@
+---
+title: "homework3 report"
+author: "王梓"
+date: "2024-07-02"
+output: html_document
+---
+

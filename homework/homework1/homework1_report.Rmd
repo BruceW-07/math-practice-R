@@ -149,6 +149,7 @@ print(Manitoba.lakes)
  text(log2(area) ~ elevation,labels=area,pos=2)
  title("Manitoba'sLargestLakes")
 ```
+
 图中的点左侧的label表示的是湖的面积，右侧的label表示的是湖的名称。y轴表示的是湖的面积取以2为底数的对数后的结果，该指标每增长一个单位表示湖的面积增加一倍。
 
 ### (b)
