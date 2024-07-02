@@ -209,9 +209,12 @@ exceeded_proportion(seq(1, 100), 40)
 ```{r}
 if(!require(Devore7)) install.packages("Devore7")
 library(Devore7)
+
+if (!require("lattice")) install.packages("lattice")
+library(lattice)
 ```
 ```{r}
-dotchart(ex01.36$C1, xlab = "escape time(sec)")
+dotplot(ex01.36$C1)
 
 exceeded_proportion(ex01.36$C1, 7 * 60)
 ```
