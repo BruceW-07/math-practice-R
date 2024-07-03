@@ -50,7 +50,7 @@ minimum 表示其找到的函数最小值，estimate 表示找到 minimum 值时
 ## 4.
 ```{r}
 plm <- function(y0, a, N = gmp$pop, Y = gmp$pcgmp) {
-  result <- nlm(mse, c(y0 = y0, a = a))
+  result <- nlm(mse, c(y0 = y0, a = a), N = N, Y = Y)
   return(list(y0 = result$estimate[1], 
               a = result$estimate[2], 
               MSE = result$minimum))
@@ -72,9 +72,9 @@ plm 中调用的 nlm 函数使用的是牛顿型算法来寻找最小值，其�
 ### a.
 ```{r}
 mean(gmp$pcgmp)
-sd(gmp$pcgmp)
+sd(gmp$pcgmp) / (length(gmp$pcgmp) ** 0.5)
 
-(sum((gmp$pcgmp - mean(gmp$pcgmp)) ^ 2) / (length(gmp$pcgmp) - 1)) ^ 0.5
+(sum((gmp$pcgmp - mean(gmp$pcgmp)) ^ 2) / ((length(gmp$pcgmp) - 1) * length(gmp$pcgmp))) ^ 0.5
 ```
 ### b.
 ```{r}
@@ -95,10 +95,10 @@ for (i in 1:length(gmp$pcgmp))
 
 ### d.
 ```{r}
-jackknife.variance <- (length(gmp$pcgmp) - 1) * 
-  mean((jackknifed.means - mean(jackknifed.means)) ^ 2)
+jackknife.variance <- (length(gmp$pcgmp) - 1) ^ 2 / length(gmp$pcgmp) * var(jackknifed.means)
 (jackknife.sd <- jackknife.variance ^ 0.5)
 ```
+和 a 中的结果基本相符。
 ## 6
 ```{r}
 plm.jackknife <- function(y0, a, N = gmp$pop, Y = gmp$pcgmp) {
@@ -108,9 +108,9 @@ plm.jackknife <- function(y0, a, N = gmp$pop, Y = gmp$pcgmp) {
     jackknife.estimates$y0 <- c(jackknife.estimates$y0, estimates$y0)
     jackknife.estimates$a <- c(jackknife.estimates$a, estimates$a)
   }
-  means <- lapply(jackknife.estimates, mean)
-  y0.variance = (length(N) - 1) * mean((jackknife.estimates$y0 - means$y0) ^ 2)
-  a.variance = (length(N) - 1) * mean((jackknife.estimates$a - means$a) ^ 2)
+  n <- length(N)
+  y0.variance = (n - 1) ^ 2 / n * var(jackknife.estimates$y0) 
+  a.variance = (n - 1) ^ 2 / n * var(jackknife.estimates$a) 
   return(list(y0.sd = y0.variance ^ 0.5, a.sd = a.variance ^ 0.5))
 }
 ```
@@ -118,20 +118,6 @@ plm.jackknife <- function(y0, a, N = gmp$pop, Y = gmp$pcgmp) {
 ```{r}
 options(warn = -1)
 plm.jackknife(y0 = 6611,a = 1/8)
-# y0 = 5000
-# a = 0.1
-# N = gmp$pop
-# Y = gmp$pcgmp
-#   jackknife.estimates <- list(y0 = c(), a = c())
-#   for (i in 1:length(N)) {
-#     estimates <- plm(y0, a, N[-i], Y[-i])
-#     jackknife.estimates$y0 <- c(jackknife.estimates$y0, estimates$y0)
-#     jackknife.estimates$a <- c(jackknife.estimates$a, estimates$a)
-#   }
-#   means <- lapply(jackknife.estimates, mean)
-#   y0.variance = (length(N) - 1) * mean((jackknife.estimates$y0 - means$y0) ^ 2)
-#   a.variance = (length(N) - 1) * mean((jackknife.estimates$a - means$a) ^ 2)
-#   (list(y0.sd = y0.variance ^ 0.5, a.sd = a.variance ^ 0.5))
 ```
 ## 7.
 ```{r}
@@ -141,7 +127,7 @@ gmp2013$pop <- gmp2013$gmp / gmp2013$pcgmp
 
 ```{r}
 options(warn = -1)
-plm(y0 = 661, a= 1/8, N = gmp2013$pop, Y = gmp2013$pcgmp)
+plm(y0 = 6611, a= 1/8, N = gmp2013$pop, Y = gmp2013$pcgmp)
 plm.jackknife(y0 = 6611, a = 1/8, N = gmp2013$pop, Y = gmp2013$pcgmp)
 ```
 
