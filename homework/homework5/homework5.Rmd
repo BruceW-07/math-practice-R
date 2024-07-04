@@ -1,0 +1,64 @@
+---
+title: "Homework5 Report"
+author: "王梓"
+date: "2024-07-04"
+output: html_document
+---
+
+## 1.
+```{r}
+percentile_ratio_discrepancies <- function(P99, P99.5, P99.9, a) {
+  return(
+    ((P99 / P99.9) ^ (-a + 1) - 10) ^ 2 +
+      ((P99.5 / P99.9) ^ (-a + 1) - 5) ^ 2 +
+      ((P99 / P99.5) ^ (-a + 1) - 2) ^ 2
+  )
+}
+
+percentile_ratio_discrepancies(1e6, 2e6, 1e7, 2)
+```
+
+## 2.
+```{r}
+exponent.multi_ratios_est <- function(P99, P99.5, P99.9) {
+  a <- 1 - log(10) / log(P99 / P99.9)
+  return(nlm(percentile_ratio_discrepancies,
+             a,
+             P99 = P99, P99.5 = P99.5, P99.9 = P99.9)$estimate)
+}
+
+exponent.multi_ratios_est(1e6, 2e6, 1e7)
+```
+
+## 3.
+```{r}
+wtid.df <- read.csv("data/wtid-report.csv")
+library(dplyr)
+library(ggplot2)
+
+wtid.df <- wtid.df |> 
+  rowwise() |> 
+  mutate(a = exponent.multi_ratios_est(P99.income.threshold,
+                                       P99.5.income.threshold,
+                                       P99.9.income.threshold))
+
+wtid.df |> 
+  ggplot(aes(x = Year, y = a)) +
+  geom_point() +
+  geom_line()
+```
+
+## 4.
+```{r}
+library(tidyr)
+
+wtid.df <- wtid.df |> 
+  rowwise() |> 
+  mutate(a_4 = 1 - log(10) / log(P99.income.threshold / P99.9.income.threshold))
+
+wtid.df |> 
+  ggplot() +
+  geom_point(aes(x = a, y = a_4))
+```
+
+两种预测方式存在一定偏差，但基本一致。
