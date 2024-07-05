@@ -24,15 +24,18 @@ func <- function(x, y0, a) {
 
 df <- gmp |> 
   select(pop, pcgmp) |> 
-  mutate("0.1276921" = func(pop, 6493.2563726,0.1276921),
-         "0.1" = func(pop, 6493.2563726,0.1),
-         "0.15" = func(pop, 6493.2563726,0.15)) |> 
+  mutate("0.125" = func(pop, 6611,1/8),
+         "0.1" = func(pop, 6611,0.1),
+         "0.15" = func(pop, 6611,0.15)) |> 
   gather(key = para, value = val, -pop, -pcgmp)
   
 df |> 
   ggplot() +
+  scale_x_log10() +
   geom_point(aes(x = pop, y = pcgmp)) +
-  geom_line(aes(x = pop, y = val, col = para))
+  geom_line(aes(x = pop, y = val, col = para), size = 1) +
+  labs(x = "Population", y = "Per-Capita Economic Output ($/person-year)",
+  title = "US Metropolitan Areas, 2006")+
 
 rm(df)
 ```
@@ -111,6 +114,7 @@ jackknife.variance <- (length(gmp$pcgmp) - 1) ^ 2 / length(gmp$pcgmp) * var(jack
 (jackknife.sd <- jackknife.variance ^ 0.5)
 ```
 和 a 中的结果基本相符。
+
 ## 6
 ```{r}
 plm.jackknife <- function(y0, a, N = gmp$pop, Y = gmp$pcgmp) {
