@@ -77,7 +77,9 @@ ggplot(data = q_data) +
          x = "prior-or-contemporary-adoptee contacts k",
          y = "q")
 ```
+
 ## 4.
+
 ### a.
 ```{r}
 a.model <- lm(p_k ~ k, data = p_data)
@@ -93,16 +95,18 @@ b.func <- function(para, X) {
 b.model <- nls(p_k ~ b.func(para, k), 
               data = p_data, 
               start = list(para = c(0, 0)))
-summary(b.model)
+summary(b.model)$coefficients[c(1, 2)]
 ```
 ### c.
 ```{r}
+library(dplyr)
+
 p_data <- p_data |> 
   mutate(a = predict(a.model, p_data), b = predict(b.model, p_data))
 
 p_tidy <- p_data |> 
-  select(-num, -total) |> 
-  gather(model, p, -k)
+  dplyr::select(-num, -total) |> 
+  gather(key = model, value = p, -k)
 
 p_tidy |> 
   ggplot(aes(x = k, y = p, col = model)) + 
